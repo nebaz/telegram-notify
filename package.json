@@ -2,6 +2,10 @@
   "name": "telegram-notify",
   "main": "TelegramNotify.js",
   "version": "1.0.0",
+  "description": "telegram-notify",
+  "repository": "https://github.com/nebaz/telegram-notify",
+  "license": "MIT",
+  "author": "Nebaz <nebaz@ya.ru>",
   "dependencies": {
     "node-fetch": "^1.7.3"
   }
