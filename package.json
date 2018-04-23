@@ -7,6 +7,7 @@
   "license": "MIT",
   "author": "Nebaz <nebaz@ya.ru>",
   "dependencies": {
-    "node-fetch": "^1.7.3"
+    "node-fetch": "^1.7.3",
+    "https-proxy-agent": "^2.2.1",
   }
 }
