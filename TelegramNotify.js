@@ -5,26 +5,25 @@ class TelegramNotify {
 
   constructor(config) {
     this.token = config.token;
-    this.adminChatId = config.adminChatId;
+    this.chatId = config.chatId;
     this.proxy = config.proxy;
   }
 
-  async sendTelegram(message) {
-    let url = 'https://api.telegram.org/bot' + this.token + '/sendmessage?chat_id=' + this.adminChatId + '&disable_web_page_preview=1&disable_notification=true&text=' + encodeURIComponent(message);
-    let fetchOptions = {};
+  async sendTelegram(message, fetchOptions = {}, disableNotification = true) {
+    fetchOptions.timeout = fetchOptions.timeout || 3000;
+    let url = 'https://api.telegram.org/bot' + this.token + '/sendmessage?chat_id=' + this.chatId + '&disable_web_page_preview=1&disable_notification=' + disableNotification + '&text=' + encodeURIComponent(message);
     if (this.proxy) {
       fetchOptions.agent = new HttpsProxyAgent(this.proxy);
     }
-    let response = await fetch(url, fetchOptions);
-    response = await response.json();
-    if (!response) {
-      console.error('telegram response is null');
-    }
-    if (response.error) {
-      console.error('telegram response is ' + response.error);
+
+    try {
+      let response = await (await fetch(url, fetchOptions)).json();
+      return response;
+    } catch (e) {
+      console.error(new Date().toLocaleString(), e.message);
+      return false;
     }
   }
-
 }
 
 module.exports = TelegramNotify;
