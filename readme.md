@@ -19,4 +19,4 @@ npm install --save telegram-notify
 * `proxy` - telegram proxy string [optional], e.q. http://login:password@ip:port
 
 ## API
-* `sendTelegram` send a telegram message
+* `send` send a telegram message
