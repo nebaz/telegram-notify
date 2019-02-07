@@ -10,15 +10,11 @@ class TelegramNotify {
   }
 
   async send(message, fetchOptions = {}, disableNotification = true) {
-    return await this.sendTelegram(message, fetchOptions, disableNotification);
-  }
-
-  async sendTelegram(message, fetchOptions = {}, disableNotification = true) {
     fetchOptions.timeout = fetchOptions.timeout || 3000;
-    let url = 'https://api.telegram.org/bot' + this.token + '/sendmessage?chat_id=' + this.chatId + '&disable_web_page_preview=1&disable_notification=' + disableNotification + '&text=' + encodeURIComponent(message);
     if (this.proxy) {
       fetchOptions.agent = new HttpsProxyAgent(this.proxy);
     }
+    let url = 'https://api.telegram.org/bot' + this.token + '/sendmessage?chat_id=' + this.chatId + '&disable_web_page_preview=1&disable_notification=' + disableNotification + '&text=' + encodeURIComponent(message);
 
     try {
       let response = await (await fetch(url, fetchOptions)).json();

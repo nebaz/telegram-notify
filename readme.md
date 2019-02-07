@@ -3,8 +3,8 @@ this package for sending telegram messages
 
 ## Usage
     const Telegram = require('telegram-notify');
-    let notify = new Telegram({token:'tokenString', chaiId:'id'}});
-    notify.sendTelegram('hello');
+    let notify = new Telegram({token:'tokenString', chaiId:'id'});
+    await notify.send('alert');
 
     
 ## Installation
@@ -14,8 +14,8 @@ npm install --save telegram-notify
 ```
 
 ## config
-* `token`  - your telegram bot token
-* `chatId` - telegram chat id for notify
+* `token`  - your telegram bot token, create bot: https://t.me/BotFather
+* `chatId` - telegram chat id for notify, get the id: https://t.me/get_id_bot
 * `proxy` - telegram proxy string [optional], e.q. http://login:password@ip:port
 
 ## API
