@@ -3,7 +3,7 @@ this package for sending telegram messages
 
 ## Usage
     const Telegram = require('telegram-notify');
-    let notify = new Telegram({token:'tokenString', chaiId:'id'});
+    let notify = new Telegram({token:'tokenString', chatId:'id'});
     await notify.send('alert');
 
     
