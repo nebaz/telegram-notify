@@ -1,5 +1,6 @@
 const {ProxyAgent} = require('undici');
 const {sleep} = require('usleep');
+const API_URL = 'https://api.telegram.org/bot';
 const MAX_ERRORS = 5;
 const TIMEOUT = 3000;
 
@@ -14,24 +15,34 @@ class TelegramNotify {
     this.dispatcher = this.proxy ? new ProxyAgent(this.proxy) : undefined;
   }
 
-  async send(message, fetchOptions = {}, apiOptions = {}) {
-    apiOptions.text = message;
-    let url = 'https://api.telegram.org/bot' + this.token + '/sendMessage?chat_id=' + this.chatId + '&';
-    return this.#prepareAndSend(url, fetchOptions, apiOptions);
+  async send(message, apiOptions = {}, fetchOptions = {}) {
+    return this.sendMessage(message, apiOptions, fetchOptions);
   }
 
-  async sendDocument(blobObject, fileName, message = '', fetchOptions = {}, apiOptions = {}) {
-    let url = 'https://api.telegram.org/bot' + this.token + '/sendDocument?';
+  async sendMessage(message, apiOptions = {}, fetchOptions = {}) {
+    apiOptions.text = message;
+    let url = API_URL + this.token + '/sendMessage?chat_id=' + this.chatId + '&';
+    return this.#prepareAndSend(url, apiOptions, fetchOptions);
+  }
+
+  async answerInlineQuery(message, apiOptions = {}, fetchOptions = {}) {
+    apiOptions.text = message;
+    let url = API_URL + this.token + '/answerInlineQuery?chat_id=' + this.chatId + '&';
+    return this.#prepareAndSend(url, apiOptions, fetchOptions);
+  }
+
+  async sendDocument(blobObject, fileName, message = '', apiOptions = {}, fetchOptions = {}) {
+    let url = API_URL + this.token + '/sendDocument?';
     let form = new FormData();
     form.append('chat_id', this.chatId);
     form.append('caption', message);
     form.append('document', blobObject, fileName);
     fetchOptions.method = 'POST';
     fetchOptions.body = form;
-    return this.#prepareAndSend(url, fetchOptions, apiOptions);
+    return this.#prepareAndSend(url, apiOptions, fetchOptions);
   }
 
-  async #prepareAndSend(url, fetchOptions, apiOptions) {
+  async #prepareAndSend(url, apiOptions, fetchOptions) {
     fetchOptions.dispatcher ??= this.dispatcher;
     apiOptions.disable_web_page_preview ??= 1;
     apiOptions.parse_mode ??= 'html';
@@ -42,11 +53,7 @@ class TelegramNotify {
   async #apiRequest(url, fetchOptions) {
     for (let attempt = 1; attempt <= this.maxErrors; attempt++) {
       try {
-        const result = await (await fetch(url, {signal: AbortSignal.timeout(this.timeout), ...fetchOptions})).json();
-        if (!result.ok) {
-          throw new Error(result.description);
-        }
-        return result;
+        return await (await fetch(url, {signal: AbortSignal.timeout(this.timeout), ...fetchOptions})).json();
       } catch (e) {
         console.error(new Date().toLocaleString(), 'attempt ' + attempt, e.message);
         await sleep(5);

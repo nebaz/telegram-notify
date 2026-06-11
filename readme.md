@@ -1,5 +1,6 @@
 # telegram-notify
 Simple Telegram notification service for Node.js with retry and proxy support.
+
 Send messages and documents.
 
 ## Usage
@@ -27,5 +28,6 @@ npm install --save telegram-notify
 * `timeout` [optional] - maximum time to wait for a response from Telegram in milliseconds (default:3000)
 
 ## API
-* `send` send a telegram message
-* `sendDocument` send a file via telegram
+* `send` - send a telegram message
+* `sendDocument` - send a file via telegram
+* `answerInlineQuery` - sets the result of an inline query

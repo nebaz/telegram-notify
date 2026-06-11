@@ -1,6 +1,6 @@
 {
   "name": "telegram-notify",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Simple Telegram notification service for Node.js with retry and proxy support. Send messages and documents.",
   "main": "TelegramNotify.js",
   "type": "commonjs",
