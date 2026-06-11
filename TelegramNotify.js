@@ -1,7 +1,7 @@
-const fetch = require('node-fetch');
-const HttpsProxyAgent = require('https-proxy-agent');
+const {ProxyAgent} = require('undici');
 const {sleep} = require('usleep');
 const MAX_ERRORS = 5;
+const TIMEOUT = 3000;
 
 class TelegramNotify {
 
@@ -10,35 +10,49 @@ class TelegramNotify {
     this.chatId = config.chatId;
     this.proxy = config.proxy;
     this.maxErrors = config.maxErrors || MAX_ERRORS;
+    this.timeout = config.timeout || TIMEOUT;
+    this.dispatcher = this.proxy ? new ProxyAgent(this.proxy) : undefined;
   }
 
   async send(message, fetchOptions = {}, apiOptions = {}) {
-    fetchOptions.timeout = fetchOptions.timeout || 3000;
-    if (this.proxy) {
-      fetchOptions.agent = new HttpsProxyAgent(this.proxy);
-    }
-    apiOptions.disable_web_page_preview = typeof apiOptions.disable_web_page_preview !== 'undefined' ? apiOptions.disable_web_page_preview : 1;
-    apiOptions.disable_notification = typeof apiOptions.disable_notification !== 'undefined' ? apiOptions.disable_notification : true;
-    apiOptions.text = encodeURIComponent(message);
-    let url = 'https://api.telegram.org/bot' + this.token + '/sendmessage?chat_id=' + this.chatId;
-    for (let param in apiOptions) {
-      url += '&' + param + '=' + apiOptions[param];
-    }
-
-    return await this.#apiRequest(url, fetchOptions);
+    apiOptions.text = message;
+    let url = 'https://api.telegram.org/bot' + this.token + '/sendMessage?chat_id=' + this.chatId + '&';
+    return this.#prepareAndSend(url, fetchOptions, apiOptions);
   }
 
-  async #apiRequest(url, fetchOptions, attempt = 1) {
-    try {
-      return await (await fetch(url, fetchOptions)).json();
-    } catch (e) {
-      console.error(new Date().toLocaleString(), 'attempt ' + attempt, e.message);
-      if (attempt >= this.maxErrors) {
-        return false;
+  async sendDocument(blobObject, fileName, message = '', fetchOptions = {}, apiOptions = {}) {
+    let url = 'https://api.telegram.org/bot' + this.token + '/sendDocument?';
+    let form = new FormData();
+    form.append('chat_id', this.chatId);
+    form.append('caption', message);
+    form.append('document', blobObject, fileName);
+    fetchOptions.method = 'POST';
+    fetchOptions.body = form;
+    return this.#prepareAndSend(url, fetchOptions, apiOptions);
+  }
+
+  async #prepareAndSend(url, fetchOptions, apiOptions) {
+    fetchOptions.dispatcher ??= this.dispatcher;
+    apiOptions.disable_web_page_preview ??= 1;
+    apiOptions.parse_mode ??= 'html';
+    url += new URLSearchParams(apiOptions).toString();
+    return this.#apiRequest(url, fetchOptions);
+  }
+
+  async #apiRequest(url, fetchOptions) {
+    for (let attempt = 1; attempt <= this.maxErrors; attempt++) {
+      try {
+        const result = await (await fetch(url, {signal: AbortSignal.timeout(this.timeout), ...fetchOptions})).json();
+        if (!result.ok) {
+          throw new Error(result.description);
+        }
+        return result;
+      } catch (e) {
+        console.error(new Date().toLocaleString(), 'attempt ' + attempt, e.message);
+        await sleep(5);
       }
-      await sleep(5);
-      return await this.#apiRequest(url, fetchOptions, ++attempt);
     }
+    return {ok: false, errorMessage: 'Maximum number of failed attempts'};
   }
 }
 

@@ -1,14 +1,28 @@
 {
   "name": "telegram-notify",
+  "version": "2.0.0",
+  "description": "Simple Telegram notification service for Node.js with retry and proxy support. Send messages and documents.",
   "main": "TelegramNotify.js",
-  "version": "1.3.3",
-  "description": "telegram-notify",
-  "repository": "https://github.com/nebaz/telegram-notify",
+  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nebaz/telegram-notify"
+  },
+  "homepage": "https://github.com/nebaz/telegram-notify",
   "license": "MIT",
   "author": "Nebaz <nebaz@ya.ru>",
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "telegram",
+    "notify",
+    "telegram-bot",
+    "notification",
+    "send message"
+  ],
   "dependencies": {
-    "node-fetch": "~2.6.7",
-    "https-proxy-agent": "~5.0.0",
+    "undici": "^7.25.0",
     "usleep": "^1.0.3"
   }
 }
